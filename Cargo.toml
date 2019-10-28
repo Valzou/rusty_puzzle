@@ -1,0 +1,14 @@
+[package]
+name = "puzzle"
+version = "0.1.0"
+authors = ["Valentin Chaboche <valentinchb@gmail.com>"]
+edition = "2018"
+
+[tasks.link-bin]
+description = "Create symbolic link to the main folder"
+script = [
+  "ln -l ./targer/debug/puzzle ./puzzle"
+]
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
