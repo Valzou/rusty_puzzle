@@ -1,4 +1,6 @@
-use crate::graphics;
+pub enum Color{
+    BLACK
+}
 
 struct Label {
     coord : u32,
