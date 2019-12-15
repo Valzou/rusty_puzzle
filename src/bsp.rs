@@ -1,8 +1,8 @@
 pub enum Color{
-    BLACK,
-    WHITE,
-    RED,
-    BLUE
+    LRED,
+    LBLUE,
+    RRED,
+    RBLUE
 }
 
 pub struct Rect {

@@ -16,21 +16,40 @@ pub struct App{
     gl: GlGraphics
 }
 
-static WHITE: [f32; 4] = [255.0, 255.0, 255.0, 1.0];
+static WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
 static BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
-static RED: [f32; 4] = [255.0, 0.0, 0.0, 1.0];
-static BLUE: [f32; 4] = [0.0, 0.0, 255.0, 1.0];
+static RED: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
+static BLUE: [f32; 4] = [0.0, 0.0, 1.0, 1.0];
+static DARK_RED: [f32; 4] = [0.6, 0.0, 0.0, 1.0];
+static DARK_BLUE: [f32; 4] = [0.0, 0.0, 0.5, 1.0];
 
 impl App {  
     
     fn render(&mut self, args: &RenderArgs){
         use graphics::*;
 
-          self.gl.draw(args.viewport(), |c, gl| {
+          self.gl.draw(args.viewport(), |_, gl| {
             clear(WHITE, gl);
         });
     }
 
+    fn to_color(color: &bsp::Color) -> [f32; 4]{
+        match color {
+            bsp::Color::RRED => DARK_RED,
+            bsp::Color::RBLUE => DARK_BLUE,
+            bsp::Color::LRED => RED,
+            bsp::Color::LBLUE => BLUE
+        }
+    }
+
+    fn from_bsp_color(color: &Option<bsp::Color>, default: [f32; 4]) -> [f32; 4]{
+        let c = match color{
+            None => default,
+            Some(c) => App::to_color(c)      
+        };
+        c
+    }
+    
     fn draws_lines(&mut self, args:&RenderArgs, lines: &Vec<bsp::Line>){
         use graphics::*;
 
@@ -39,28 +58,39 @@ impl App {
                 .transform;
             
             for l in lines {
-                let color = match &l.color{
-                    None => BLACK,
-                    Some(c) => match c {
-                        bsp::Color::BLACK => BLACK,
-                        bsp::Color::WHITE => WHITE,
-                        bsp::Color::RED => RED,
-                        bsp::Color::BLUE => BLUE
-                    }                       
-                };
+                let color = App::from_bsp_color(&l.color, BLACK);
                 
                 let (sx, sy) = l.start;
                 let (ex, ey) = l.end;
                 line(color, 1.0, [sx as f64, sy as f64, ex as f64, ey as f64], transform, gl);
             }
+        });    
+          
+    }
+
+    fn draw_rects(&mut self, args:&RenderArgs, rects: &Vec<bsp::Rect>){
+        use graphics::*;
+
+        self.gl.draw(args.viewport(), |c, gl| {
+            let transform = c
+                .transform;
+
+            for r in rects {
+                let color = App::from_bsp_color(&r.color, WHITE);
+
+                let (sx, sy) = r.start;
+                let (ex, ey) = r.end;
+
+                rectangle(color, [sx as f64, sy as f64, ex as f64, ey as f64], transform, gl);
+                
+            }
         });
         
-           
     }
 }
 
 fn create_window(opengl: OpenGL, name:String, width:u32, height:u32) -> Window{
-    let mut window: Window = WindowSettings::new(
+    let window: Window = WindowSettings::new(
         name,
         [width, height]
     )
@@ -72,7 +102,7 @@ fn create_window(opengl: OpenGL, name:String, width:u32, height:u32) -> Window{
     return window;
 }
 
-pub fn create_application(width: u32, height:u32, lines: &Vec<bsp::Line>){
+pub fn create_application(width: u32, height:u32, lines: &Vec<bsp::Line>, rects: &Vec<bsp::Rect>){
     let opengl = OpenGL::V3_2;
     let mut window = create_window(opengl, "Rusty Puzzle".to_string(), width, height);
     let mut app = App { 
@@ -84,7 +114,8 @@ pub fn create_application(width: u32, height:u32, lines: &Vec<bsp::Line>){
     while let Some(e) = events.next(&mut window){
         if let Some(args) = e.render_args() {
             app.render(&args);
-            app.draws_lines(&args, lines);
+            app.draw_rects(&args, rects);
+            app.draws_lines(&args, lines)
         } 
     }
 }
