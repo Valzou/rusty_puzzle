@@ -112,7 +112,7 @@ pub fn create_application(width: u32, height:u32, lines: &Vec<bsp::Line>, rects:
     };
 
     let mut events = Events::new(EventSettings::new());
-g
+
     let mut cursor_pos: [f64; 2] = [-1.0; 2];
     
     while let Some(e) = events.next(&mut window){
