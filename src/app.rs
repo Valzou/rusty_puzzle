@@ -52,7 +52,7 @@ impl App {
         c
     }
     
-    fn draws_lines(&mut self, args:&RenderArgs, lines: &Vec<bsp::Line>){
+    fn draws_lines(&mut self, args:&RenderArgs, lines: &Vec<&bsp::Line>){
         use graphics::*;
 
         self.gl.draw(args.viewport(), |c, gl| {
@@ -104,7 +104,7 @@ fn create_window(opengl: OpenGL, name:String, width:u32, height:u32) -> Window{
     return window;
 }
 
-pub fn create_application(width: u32, height:u32, lines: &Vec<bsp::Line>, rects: &mut Vec<bsp::Rect>){
+pub fn create_application(width: u32, height:u32, lines: &Vec<&bsp::Line>, rects: &mut Vec<bsp::Rect>){
     let opengl = OpenGL::V3_2;
     let mut window = create_window(opengl, "Rusty Puzzle".to_string(), width, height);
     let mut app = App { 
