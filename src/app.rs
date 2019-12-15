@@ -38,7 +38,9 @@ impl App {
             bsp::Color::RRED => DARK_RED,
             bsp::Color::RBLUE => DARK_BLUE,
             bsp::Color::LRED => RED,
-            bsp::Color::LBLUE => BLUE
+            bsp::Color::LBLUE => BLUE,
+            bsp::Color::WHITE => WHITE
+                
         }
     }
 
@@ -68,7 +70,7 @@ impl App {
           
     }
 
-    fn draw_rects(&mut self, args:&RenderArgs, rects: &Vec<bsp::Rect>){
+    fn draw_rects(&mut self, args:&RenderArgs, rects: &mut Vec<bsp::Rect>){
         use graphics::*;
 
         self.gl.draw(args.viewport(), |c, gl| {
@@ -102,7 +104,7 @@ fn create_window(opengl: OpenGL, name:String, width:u32, height:u32) -> Window{
     return window;
 }
 
-pub fn create_application(width: u32, height:u32, lines: &Vec<bsp::Line>, rects: &Vec<bsp::Rect>){
+pub fn create_application(width: u32, height:u32, lines: &Vec<bsp::Line>, rects: &mut Vec<bsp::Rect>){
     let opengl = OpenGL::V3_2;
     let mut window = create_window(opengl, "Rusty Puzzle".to_string(), width, height);
     let mut app = App { 
@@ -110,12 +112,27 @@ pub fn create_application(width: u32, height:u32, lines: &Vec<bsp::Line>, rects:
     };
 
     let mut events = Events::new(EventSettings::new());
+g
+    let mut cursor_pos: [f64; 2] = [-1.0; 2];
     
     while let Some(e) = events.next(&mut window){
         if let Some(args) = e.render_args() {
             app.render(&args);
             app.draw_rects(&args, rects);
             app.draws_lines(&args, lines)
-        } 
+        }
+
+        if let Some(pos) = e.mouse_cursor_args(){
+            cursor_pos = pos;
+        }
+        
+        if let Some(Button::Mouse(MouseButton::Left)) = e.press_args() {
+            let x = cursor_pos[0];
+            let y = cursor_pos[1];
+
+            if x >= 0.0 && x < width as f64 && y >= 0.0 && y < height as f64 {
+                bsp::change_rect_color(rects, x as u32, y as u32);
+            }
+        }
     }
 }
