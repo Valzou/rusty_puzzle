@@ -72,9 +72,37 @@ pub fn bsp_to_lines(bsp: &Bsp) -> Vec<&Line> {
     
 }
 
-pub fn bsp_to_rectangles(_bsp: &Bsp) -> Vec<Rect> {
-    let rects = Vec::new();
-    return rects;
+fn bsp_to_rectangles_aux(bsp: &Bsp, startx: u32, endx: u32, starty: u32, endy: u32) -> Vec<Rect> {
+    match bsp {
+        Bsp::R => {
+            let mut v = Vec::new();
+            let r = Rect {
+                start: (startx, starty),
+                end: (endx, endy),
+                color: None
+            };
+            v.push(r);
+            v
+        },
+        Bsp::L (Line{start:(sx, sy), end:(ex, _), color:_}, l, r) => {
+            let is_vertical = sx==ex;
+            let mut left;
+            let mut right;
+            if is_vertical {
+                left = bsp_to_rectangles_aux(&*l, startx, sx-1, starty, endy);
+                right = bsp_to_rectangles_aux(&*r, sx+1, endx, starty, endy);
+            } else {
+                left = bsp_to_rectangles_aux(&*l, startx, endx, starty, sy-1);
+                right = bsp_to_rectangles_aux(&*r, startx, endx, sy+1, endy);
+            }
+            left.append(&mut right);
+            left
+        }
+    }
+}
+
+pub fn bsp_to_rectangles(bsp: &Bsp, width: u32, height: u32) -> Vec<Rect> {
+    return bsp_to_rectangles_aux(bsp, 0, width, 0, height);
 }
 
 fn generate_bsp_aux(n: u32, startx: u32, endx: u32, starty: u32, endy: u32, axis: Axis) -> Bsp{
@@ -109,7 +137,7 @@ fn generate_bsp_aux(n: u32, startx: u32, endx: u32, starty: u32, endy: u32, axis
     let line = Line {
         start: start,
         end: end,
-        color: Some(color)        
+        color: Some(color),
     };
 
     let next_axis = match axis {
@@ -142,7 +170,7 @@ fn generate_bsp_aux(n: u32, startx: u32, endx: u32, starty: u32, endy: u32, axis
     let left = Box::new(generate_bsp_aux(n-1, next_left_startx, next_left_endx, next_left_starty, next_left_endy, next_axis.clone()));
     let right = Box::new(generate_bsp_aux(n-1, next_right_startx, next_right_endx, next_right_starty, next_right_endy, next_axis.clone()));
                  
-    return Bsp::L (line, left, right)
+    return Bsp::L (line, left, right);
 }
 
 pub fn generate_bsp(n: u32, width: u32, height: u32) -> Bsp {

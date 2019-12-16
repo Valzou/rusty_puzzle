@@ -12,7 +12,7 @@ fn main() {
 
     let bsp = bsp::generate_bsp(nodes, width, height);
     let lines = bsp::bsp_to_lines(&bsp);
-    let mut rects = bsp::bsp_to_rectangles(&bsp);
+    let mut rects = bsp::bsp_to_rectangles(&bsp, width, height);
 
     app::create_application(400, 400, &lines, &mut rects);
 }
