@@ -63,7 +63,6 @@ pub fn change_rect_color(rects: &mut Vec<Rect>, x: u32, y: u32){
 fn line_color_from_rects(label: u32, rects: &Vec<Rect>) -> Option<Color>{
     let mut reds = 0;
     let mut blues = 0;
-
     for r in rects {
         let (sx, sy) = r.start;
         let (ex, ey) = r.end;
@@ -74,7 +73,7 @@ fn line_color_from_rects(label: u32, rects: &Vec<Rect>) -> Option<Color>{
             (sy!=0 && label==sy-1) ||
             (label == sy+1) ||
             (ey!=0 && label==ey-1) ||
-            (label == ey-1)            
+            (label == ey+1)            
         {
             match r.color {
                 Some(Color::RRED) => reds = reds + 1,
@@ -102,14 +101,13 @@ fn bsp_to_lines(bsp: &Bsp, rects: &Vec<Rect>) -> Vec<Line> {
             left.append(&mut right);
 
             let (sx, sy) = l.start;
-            let (ex, _) = l.start;
+            let (ex, _) = l.end;
             let label;
             if sx==ex {
                 label = sx;
             }else {
                 label = sy;
             }
-
             let mut new_l = l.clone();
             new_l.color = line_color_from_rects(label, rects);
             left.push(new_l);
@@ -180,7 +178,6 @@ fn generate_bsp_aux(n: u32, startx: u32, endx: u32, starty: u32, endy: u32, axis
         Axis::HORIZONTAL => ( (startx, coord), (endx, coord) )
     };
     
-
     let line = Line {
         start: start,
         end: end,
@@ -237,4 +234,29 @@ pub fn create_game(n: u32, width: u32, height: u32) -> (Bsp, Vec<Rect>, Vec<Line
 
     return (bsp, rects, lines);
     
+}
+
+pub fn is_solution(rects: &mut Vec<Rect>, lines: &Vec<Line>) -> bool{ 
+    for l in lines {
+        let (sx, sy) = l.start;
+        let (ex, _) = l.end;
+        let mut label;
+        label = sy;
+        if sx == ex {
+            label = sx;
+        }
+        match (l.color.clone(), line_color_from_rects(label, rects)) {
+            ( Some(Color::LRED), Some(Color::LRED) ) => (),
+            ( Some(Color::LBLUE), Some(Color::LBLUE) ) => (),
+            ( Some(Color::LMAGENTA), Some(Color::LMAGENTA) ) => (),
+            (_, _) => return false
+        }
+    }
+    for r in rects {
+        match r.color {
+            None => return false,
+            _ => ()
+        }
+    }
+    return true
 }

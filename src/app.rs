@@ -120,7 +120,7 @@ pub fn create_application(width: u32, height:u32, lines: &Vec<bsp::Line>, rects:
         if let Some(args) = e.render_args() {
             app.render(&args);
             app.draw_rects(&args, rects);
-            app.draws_lines(&args, lines)
+            app.draws_lines(&args, lines);
         }
 
         if let Some(pos) = e.mouse_cursor_args(){
@@ -133,6 +133,17 @@ pub fn create_application(width: u32, height:u32, lines: &Vec<bsp::Line>, rects:
 
             if x >= 0.0 && x < width as f64 && y >= 0.0 && y < height as f64 {
                 bsp::change_rect_color(rects, x as u32, y as u32);
+
+                if bsp::is_solution(rects, lines) {
+                    println!("Congratulations");
+                    while let Some(e) = events.next(&mut window){
+                        if let Some(args) = e.render_args() {
+                            app.render(&args);
+                            app.draw_rects(&args, rects);
+                            app.draws_lines(&args, lines);
+                        }
+                    }
+                }
             }
         }
     }

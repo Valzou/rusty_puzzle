@@ -12,5 +12,5 @@ fn main() {
 
     let (_, mut rects, lines) = bsp::create_game(nodes, width, height);
 
-    app::create_application(400, 400, &lines, &mut rects);
+    app::create_application(width, height, &lines, &mut rects);
 }
